@@ -1,0 +1,117 @@
+---
+title: "Pertemuan 13 Praktikum"
+author: "Alwan Rahmana"
+date: "6/2/2022"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+library(haven)
+library(lmtest)
+library(car)
+library(dplyr)
+data1<-Data_Regresi01  #multiko cek
+data2<-Data_Modul13    #autoko cek
+View(data1)
+View(data2)
+```
+
+model contoh dengan pelanggaran asumsi nonmultikolinearitas
+
+```{r}
+y<-data1$X10
+x1<-data1$X12
+x2<-data1$X9
+x3<-data1$X11
+x4<-data1$X2
+x5<-data1$X13
+
+model1<-lm(y~x1+x2+x3+x4+x5)
+
+summary(model1)
+```
+```{r}
+round(cor(data1[,c(15,12,14,5,16)]),3)
+vif(model1)
+```
+Berdasarkan tabel korelasi, terlihat bahwa terdapat korelasi yang kuat antara Jumlah penduduk dan Total Pendapatan Penduduk yang ditunjukkan dengan koefisien korelasi sebesar 0,97. VIF-nya x4 dan x5 gede.
+
+Kita buang yang berkorelasi kecil dengan Y
+
+```{r}
+round(cor(data1[,c(13,5,16)]),3)
+```
+
+
+```{r}
+modelok<-lm(y~x1+x2+x3+x5)
+
+round(cor(data1[,c(15,12,14,16)]),3)
+vif(modelok)
+```
+berdasarkan tabel korelasi, terlihat bahwa sudah tidak terdapat korelasi yang kuat antara variabel bebeas. Hal ini juga ditunjukkan dengan nilai VIF dari semua variabel bebas yang kurang dari 10. Oleh karena itu, dapat dikatakan bahwa asusmsi nonmultikolinearitas telah terpenuhi.
+
+```{r}
+summary(model1)$adj.r.squared
+summary(modelok)$adj.r.squared
+```
+model contoh dengan pelanggaran asumsi nonautokorelasi
+
+H0: nonautorkorelasi
+H1: autokorelasi
+```{r}
+model2<-lm(Y~X,data = data2)
+summary(model2)
+```
+
+```{r}
+dwtest(model2)
+
+```
+
+```{r}
+data2$lagY<-cbind()
+data2$lagY<-lag(data2$Y, n = 1, default = NA)
+data2$Ybaru<-cbind()
+data2$Ybaru<-data2$Y-data2$lagY
+
+data2$lagX<-cbind()
+data2$lagX<-lag(data2$X,n=1, default=NA)
+data2$Xbaru<-cbind()
+data2$Xbaru<-data2$X-data2$lagX
+View(data2)
+
+model2ok<-lm(Ybaru~Xbaru,data=data2)
+summary(model2ok)
+dwtest(model2ok)
+```
+berdasarkan output di atas, didapatkan dh = 1.7488. Untuk n=19 dan k=1 dari tabel durbin watson diperoleh angka dL=1.804 dan dU dU=1.4012. dU<dh<4-dU menunjukkan bahwa nonautokorelasi telah terpenuhi.
+```{r}
+
+```
+

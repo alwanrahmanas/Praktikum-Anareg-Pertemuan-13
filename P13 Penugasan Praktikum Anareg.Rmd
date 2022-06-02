@@ -1,0 +1,127 @@
+---
+title: "Penugasan Praktikum Anareg Pertemuan 13"
+author: "Alwan Rahmana"
+date: "6/2/2022"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(haven)
+library(lmtest)
+library(car)
+library(dplyr)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+#SOAL A
+
+```{r}
+data2<-Data_TugasModul13a
+View(data2)
+```
+
+
+```{r}
+model2<-lm(Y~X1+X2,data=data2)
+summary(model2)
+```
+```{r}
+dL=1.5144	
+dU=1.6518
+
+4-dU
+4-dL
+a<-dwtest(model2)
+
+DW<-a$statistic
+DW
+if(DW<dL){
+  print("Autokorelasi Positif")
+}
+```
+
+
+```{r}
+data2$lagY<-cbind()
+data2$lagY<-lag(data2$Y, n = 1, default = NA)
+data2$Ybaru<-cbind()
+data2$Ybaru<-data2$Y-data2$lagY
+
+data2$lagX1<-cbind()
+data2$lagX1<-lag(data2$X1,n=1, default=NA)
+data2$X1baru<-cbind()
+data2$X1baru<-data2$X1-data2$lagX1
+
+data2$lagX2<-cbind()
+data2$lagX2<-lag(data2$X2,n=1, default=NA)
+data2$X2baru<-cbind()
+data2$X2baru<-data2$X2-data2$lagX2
+View(data2)
+
+
+model2ok<-lm(Ybaru~X1baru+X2baru,data=data2)
+summary(model2ok)
+dwtest(model2ok)
+DW<-dwtest(model2ok)$statistic
+
+if(dL<DW && DW<4-dU){
+  print("Tidak terdapat autokorelasi")
+}
+```
+
+
+
+
+
+
+
+
+#SOAL B
+
+```{r}
+data<-Data_TugasModul13b
+View(data)
+```
+
+```{r}
+y<-data$Y
+x1<-data$X1
+x2<-data$X2
+x3<-data$X3
+x4<-data$X4
+x5<-data$X5
+
+model1<-lm(y~x1+x2+x3+x4+x5)
+
+summary(model1)
+```
+```{r}
+round(cor(data[,c(2,3,4,5,6)]),3)
+vif(model1)
+```
+buang variabel yang berkaitan lemah dengan Y
+
+```{r}
+round(cor(data[,c(1,2,3,4,5,6)]),3)
+
+```
+
+```{r}
+model1ok<-lm(y~x1+x2+x5+x4)
+vif(model1ok)
+```
+
+tidak ada VIF yang lebih dari 10.
+
+```{r}
+summary(model1)$adj.r.squared
+summary(model1ok)$adj.r.squared
+```
+adj. R-Squared masih tidak berbeda jauh
